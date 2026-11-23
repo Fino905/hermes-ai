@@ -86,7 +86,7 @@ function formatInlineText(text: string): React.ReactNode[] {
       return (
         <code
           key={index}
-          className="px-1.5 py-0.5 mx-0.5 rounded bg-zinc-800/90 text-indigo-300 text-xs sm:text-[13px] font-mono border border-zinc-700/40"
+          className="px-1.5 py-0.5 mx-0.5 rounded bg-zinc-800 text-zinc-100 text-xs sm:text-[13px] font-mono border border-zinc-700"
         >
           {part.slice(1, -1)}
         </code>
@@ -122,7 +122,7 @@ function formatInlineText(text: string): React.ReactNode[] {
       return (
         <span
           key={index}
-          className="inline-flex items-center gap-1 px-1.5 py-0.5 mx-0.5 rounded-md bg-purple-950/60 text-purple-300 border border-purple-800/60 text-xs font-mono font-medium shadow-xs"
+          className="inline-flex items-center gap-1 px-1.5 py-0.5 mx-0.5 rounded-md bg-zinc-800 text-zinc-200 border border-zinc-700 text-xs font-mono font-medium shadow-xs"
           title={`Obsidian Note: ${wikiMatch[1]}`}
         >
           <span className="text-[10px]">🧠</span>
@@ -139,7 +139,7 @@ function formatInlineText(text: string): React.ReactNode[] {
           href={linkMatch[2]}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors"
+          className="text-white hover:text-zinc-300 underline underline-offset-2 transition-colors"
         >
           {linkMatch[1]}
         </a>
@@ -245,7 +245,7 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
       elements.push(
         <blockquote
           key={`quote-${elementKey++}`}
-          className="my-3 border-l-4 border-indigo-500/80 bg-zinc-900/50 pl-4 py-2 rounded-r-lg text-zinc-300 italic text-sm"
+          className="my-3 border-l-4 border-zinc-500 bg-zinc-900/60 pl-4 py-2 rounded-r-lg text-zinc-300 italic text-sm"
         >
           {quoteLines.map((q, idx) => (
             <p key={idx} className={idx > 0 ? "mt-1.5" : ""}>
@@ -340,7 +340,7 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
                     type="checkbox"
                     checked={checked}
                     readOnly
-                    className="mt-1 h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-800 text-indigo-500 accent-indigo-500 pointer-events-none"
+                    className="mt-1 h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-800 text-white accent-white pointer-events-none"
                   />
                   <span>{formatInlineText(itemText)}</span>
                 </li>
@@ -431,7 +431,7 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
       {elements}
       {isStreaming && (
         <span
-          className="inline-block w-2 h-4 ml-1 bg-indigo-400 align-middle animate-pulse"
+          className="inline-block w-2 h-4 ml-1 bg-white align-middle animate-pulse"
           aria-hidden="true"
         />
       )}

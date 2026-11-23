@@ -72,7 +72,7 @@ export function ChatHeader() {
             onClick={() => setIsModelDropdownOpen((prev) => !prev)}
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800/90 border border-zinc-800 text-xs font-medium text-zinc-200 transition-all shadow-sm"
           >
-            <SparklesIcon className="w-3.5 h-3.5 text-indigo-400" />
+            <SparklesIcon className="w-3.5 h-3.5 text-zinc-300" />
             <span>{activeModel}</span>
             <ChevronDownIcon
               className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${
@@ -102,7 +102,7 @@ export function ChatHeader() {
                     }}
                     className={`w-full text-left p-2.5 rounded-xl transition-all ${
                       activeModel === m.id
-                        ? "bg-indigo-600/10 border border-indigo-500/30 text-white"
+                        ? "bg-zinc-800 border border-zinc-700 text-white"
                         : "hover:bg-zinc-800/60 text-zinc-300"
                     }`}
                   >
@@ -121,36 +121,36 @@ export function ChatHeader() {
         </div>
       </div>
 
-      {/* Middle: Badges for Obsidian, AI Model Engine & Multilingual */}
+      {/* Middle: Badges for Obsidian, AI Model Engine & Multilingual (Monochrome Clean) */}
       <div className="flex items-center gap-2">
         {/* Obsidian Brain Badge */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-950/40 border border-purple-800/50 text-[11px] font-medium text-purple-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-          <span>🧠 Obsidian: <span className="text-purple-200 font-semibold">{vaultInfo?.vaultName || "HermesBrain"}</span> ({vaultInfo?.totalNotes ?? "..."})</span>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-medium text-zinc-300">
+          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+          <span>🧠 Obsidian: <span className="text-white font-semibold">{vaultInfo?.vaultName || "HermesBrain"}</span> ({vaultInfo?.totalNotes ?? "..."})</span>
         </div>
 
         {/* AI Engine Status Badge */}
         {llmInfo?.isOnline ? (
-          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/40 border border-emerald-800/50 text-[11px] font-medium text-emerald-300" title="Model AI Lokal Siap Menjawab">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-medium text-zinc-300" title="Model AI Lokal Siap Menjawab">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             <span>⚡ AI Engine: Online</span>
           </div>
         ) : (
-          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-950/40 border border-amber-800/50 text-[11px] font-medium text-amber-300" title="AI Backend Offline">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-medium text-zinc-400" title="AI Backend Offline">
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
             <span>⚠️ AI Engine: Offline</span>
           </div>
         )}
 
         {/* Multilingual Badge */}
-        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-950/40 border border-blue-800/50 text-[11px] font-medium text-blue-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-medium text-zinc-300">
+          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
           <span>🌐 Semua Bahasa</span>
         </div>
 
         {/* Web Ingestion Badge */}
-        <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-950/40 border border-cyan-800/50 text-[11px] font-medium text-cyan-300" title="Tempel URL web apa saja untuk diserap ke Obsidian">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+        <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-medium text-zinc-300" title="Tempel URL web apa saja untuk diserap ke Obsidian">
+          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
           <span>🔍 Serap Web: Aktif</span>
         </div>
       </div>

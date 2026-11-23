@@ -16,17 +16,10 @@ export function FwinoboxLogo({ className = "w-6 h-6", size = 24, ...props }: Ico
       className={className}
       {...props}
     >
-      <defs>
-        <linearGradient id="fwinoboxGrad" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#38BDF8" />
-          <stop offset="0.5" stopColor="#6366F1" />
-          <stop offset="1" stopColor="#EC4899" />
-        </linearGradient>
-      </defs>
-      <rect width="32" height="32" rx="8" fill="url(#fwinoboxGrad)" fillOpacity="0.15" />
+      <rect width="32" height="32" rx="8" fill="#FFFFFF" fillOpacity="0.08" stroke="#FFFFFF" strokeWidth="1.5" strokeOpacity="0.2" />
       <path
         d="M8 8L16 4L24 8V16C24 21.5 16 27 16 27C16 27 8 21.5 8 16V8Z"
-        stroke="url(#fwinoboxGrad)"
+        stroke="#FFFFFF"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -38,7 +31,7 @@ export function FwinoboxLogo({ className = "w-6 h-6", size = 24, ...props }: Ico
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="16" cy="16" r="1.5" fill="#38BDF8" />
+      <circle cx="16" cy="16" r="1.5" fill="#FFFFFF" />
     </svg>
   );
 }

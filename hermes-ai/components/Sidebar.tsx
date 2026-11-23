@@ -123,13 +123,13 @@ export function Sidebar() {
         {/* Brand & Mobile close button */}
         <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-800/80">
           <div className="flex items-center gap-2.5">
-            <FwinoboxLogo className="w-7 h-7 text-indigo-400" />
+            <FwinoboxLogo className="w-7 h-7 text-white" />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-semibold text-zinc-100 tracking-tight text-base">
                   Fwinobox AI
                 </span>
-                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-zinc-850 text-zinc-300 border border-zinc-700">
                   v1.0
                 </span>
               </div>
@@ -145,11 +145,11 @@ export function Sidebar() {
           </button>
         </div>
 
-        {/* Action button: + New Chat */}
+        {/* Action button: + New Chat (Solid High-Contrast Monochrome) */}
         <div className="p-3">
           <button
             onClick={createNewChat}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-medium text-sm shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 active:scale-[0.99] transition-all"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-sm shadow-sm active:scale-[0.99] transition-all"
           >
             <PlusIcon className="w-4 h-4 stroke-[2.5]" />
             <span>New Chat</span>
@@ -165,7 +165,7 @@ export function Sidebar() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search conversations..."
-              className="w-full pl-9 pr-7 py-1.5 bg-zinc-900/80 border border-zinc-800/80 rounded-lg text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all"
+              className="w-full pl-9 pr-7 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-600 focus:border-zinc-500 transition-all"
             />
             {searchQuery && (
               <button
@@ -198,8 +198,8 @@ export function Sidebar() {
         <div className="p-3 border-t border-zinc-800/80 bg-zinc-950/60 space-y-2">
           <div className="flex items-center justify-between text-xs text-zinc-400">
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-              <span className="text-[11px] font-medium text-purple-300">Obsidian Brain Active</span>
+              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              <span className="text-[11px] font-medium text-zinc-300">Obsidian Brain Active</span>
             </div>
             {conversations.length > 1 && (
               <button
@@ -208,7 +208,7 @@ export function Sidebar() {
                     clearAllConversations();
                   }
                 }}
-                className="text-[11px] text-zinc-500 hover:text-red-400 transition-colors"
+                className="text-[11px] text-zinc-500 hover:text-white transition-colors"
                 title="Clear all conversations"
               >
                 Clear all
@@ -237,12 +237,12 @@ export function Sidebar() {
               key={conv.id}
               onClick={() => selectConversation(conv.id)}
               className={`group relative flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs cursor-pointer transition-all ${isActive
-                  ? "bg-zinc-800/90 text-zinc-100 font-medium shadow-sm border border-zinc-700/40"
+                  ? "bg-zinc-800 text-white font-medium shadow-sm border border-zinc-700"
                   : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
                 }`}
             >
               <MessageSquareIcon
-                className={`w-4 h-4 shrink-0 transition-colors ${isActive ? "text-indigo-400" : "text-zinc-500 group-hover:text-zinc-300"
+                className={`w-4 h-4 shrink-0 transition-colors ${isActive ? "text-white" : "text-zinc-500 group-hover:text-zinc-300"
                   }`}
               />
 
@@ -258,11 +258,11 @@ export function Sidebar() {
                     onChange={(e) => setEditTitle(e.target.value)}
                     autoFocus
                     onBlur={() => saveEditing(conv.id)}
-                    className="w-full bg-zinc-950 px-2 py-0.5 rounded border border-indigo-500 text-xs text-white focus:outline-none"
+                    className="w-full bg-zinc-950 px-2 py-0.5 rounded border border-zinc-600 text-xs text-white focus:outline-none"
                   />
                   <button
                     type="submit"
-                    className="p-1 hover:text-emerald-400 text-zinc-400"
+                    className="p-1 hover:text-white text-zinc-400"
                     title="Save"
                   >
                     <CheckIcon className="w-3.5 h-3.5" />
