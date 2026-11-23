@@ -588,42 +588,25 @@ ${absorbedArticle.content.slice(0, 1000)}...
 
   // 7. Multi-Source Web Search Absorption
   if (searchPackage && searchPackage.results.length > 0) {
-    let response = `### 🌐 Hasil Penyerapan Langsung dari Situs Web
+    let response = "";
 
-Berikut informasi yang berhasil diserap dari **${searchPackage.results.length} situs web** untuk topik:
-> *"${searchPackage.query}"*
-
----
-
-`;
-
-    // If full official web article was extracted, display it prominently
+    // If full official web article was extracted, synthesize directly
     if (searchPackage.topArticle && searchPackage.topArticle.content) {
-      response += `### 📄 Konten Resmi dari [${searchPackage.topArticle.title}](${searchPackage.topArticle.url})
-> Domain: \`${searchPackage.topArticle.domain}\` | Diserap langsung dari website asli
-
-${searchPackage.topArticle.content.slice(0, 2000)}
-
----
-
-### 🌐 Sumber-Sumber Web Lainnya yang Terkait:
-`;
+      response += `Berdasarkan dokumentasi dan sumber resmi [${searchPackage.topArticle.title}](${searchPackage.topArticle.url}):\n\n`;
+      response += `${searchPackage.topArticle.content.slice(0, 1200)}\n\n`;
+      response += `**Sumber Referensi:**\n`;
+    } else {
+      response += `Berikut rangkuman informasi yang diperoleh mengenai **${searchPackage.query}**:\n\n`;
     }
 
     response += searchPackage.results
-      .map(
-        (res, idx) =>
-          `#### ${idx + 1}. [${res.title}](${res.url})
-- **Domain**: \`${res.domain}\` (${res.sourceType})
-> ${res.snippet}`
-      )
+      .slice(0, 4)
+      .map((res) => `- [${res.title}](${res.url}) — ${res.snippet}`)
       .join("\n\n");
 
-    response += `\n\n---\n\n### 📚 Status Memori Obsidian Brain:\n`;
     if (searchPackage.savedNotePath) {
-      response += `- Catatan riset multi-web ini telah otomatis disimpan ke vault Anda: \`${searchPackage.savedNotePath}\`\n`;
+      response += `\n\n💡 *Catatan riset ini telah disimpan ke vault Obsidian Anda di \`${searchPackage.savedNotePath}\`.*`;
     }
-    response += `- Informasi aktual dari situs web telah tersimpan permanen di memori Obsidian Anda!`;
 
     return response;
   }
@@ -732,9 +715,13 @@ export async function POST(req: NextRequest) {
         console.warn("Web fetch warning for URL:", targetUrl, e);
       }
     } else if (shouldPerformWebSearch(lastUserMessage)) {
-      // User asked a question that needs multi-source web search absorption!
+      // User asked a question that needs multi-source web search
       try {
-        searchPackage = await absorbMultiWebKnowledge(lastUserMessage, true);
+        const wantsSave =
+          lastUserMessage.toLowerCase().includes("simpan") ||
+          lastUserMessage.toLowerCase().includes("catat") ||
+          lastUserMessage.toLowerCase().includes("ke obsidian");
+        searchPackage = await absorbMultiWebKnowledge(lastUserMessage, wantsSave);
       } catch (e) {
         console.warn("Multi-web search error:", e);
       }
@@ -780,9 +767,9 @@ ${searchPackage.results
 ${searchPackage.savedNotePath ? `Knowledge saved to Obsidian Vault: [[${searchPackage.query}]] (${searchPackage.savedNotePath})\n` : ""}
 ===============================================
 Instructions for Multi-Source Web Knowledge:
-1. Answer the user's question accurately and thoughtfully by synthesizing the live web information above.
-2. Cite the web sources appropriately using markdown links like [Title](URL).
-3. Mention that this research has also been absorbed into their Obsidian Brain.
+1. Answer the user's question directly, clearly, and conversationally in natural paragraphs using the live web information above.
+2. Cite the web sources cleanly with markdown links like [Title](URL).
+3. Do NOT output repetitive template headers, boilerplate tables, or repetitive phrases.
 `;
     }
 

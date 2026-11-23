@@ -94,9 +94,13 @@ export function listVaultNotes(): VaultNote[] {
           scanDirectory(fullPath);
         } else if (entry.isFile() && entry.name.toLowerCase().endsWith(".md")) {
           try {
+            const relPath = path.relative(vaultPath, fullPath).replace(/\\/g, "/");
+
+            // Ignore auto-generated web research cache files from polluting memory
+            if (relPath.startsWith("knowledge/research/")) continue;
+
             const stat = fs.statSync(fullPath);
             const content = fs.readFileSync(fullPath, "utf-8");
-            const relPath = path.relative(vaultPath, fullPath).replace(/\\/g, "/");
             const folder = path.dirname(relPath) === "." ? "root" : path.dirname(relPath);
             const title = entry.name.replace(/\.md$/i, "");
 
@@ -317,14 +321,14 @@ You MUST:
   }
 
   prompt += `Guidelines:
-1. You represent Fwinobox AI, whose long-term brain and memory lives in this Obsidian Vault.
-2. Answer directly, clearly, and concisely. Never repeat phrases or loop sentences.
+1. You represent Fwinobox AI, an intelligent personal assistant.
+2. Answer directly, naturally, and conversationally in fluent paragraphs. Do NOT repeat boilerplate phrases or use rigid templates.
 3. When listing items with numbers, ALWAYS use sequential numbers: 1., 2., 3., 4., etc. (never repeat '1.' for every item).
 4. Once you have answered the user's inquiry, stop generating immediately.
-5. If the user asks who you are, what your purpose is, or about your memory, refer to your Obsidian Core Memory.
+5. If the user asks who you are or about your purpose, explain naturally and politely based on your Core Memory.
 6. When referencing notes in the vault, you may use Obsidian-style wikilinks like [[Note Title]].
 7. Always be helpful, concise, and articulate in whatever language the user speaks.
-8. If the user tells you to remember something or write a note, let them know you can save it into Obsidian.
+8. If the user explicitly asks to remember something or write a note, confirm that you will save it into Obsidian.
 `;
 
   return prompt;

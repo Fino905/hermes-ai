@@ -141,7 +141,7 @@ export async function searchWikipedia(query: string, lang = "id"): Promise<Searc
  */
 export async function absorbMultiWebKnowledge(
   query: string,
-  saveToObsidian = true
+  saveToObsidian = false
 ): Promise<WebSearchPackage> {
   // Parallel search on Bing and Wikipedia
   const [bingResults, wikiResults] = await Promise.all([
@@ -243,13 +243,13 @@ export function shouldPerformWebSearch(query: string): boolean {
   if (lower.length < 3) return false;
   if (/^[\d\s+\-*/()^.%]+$/.test(lower)) return false;
 
-  // 2. Pure casual conversation that should be answered instantly by local logic
+  // 2. Pure casual conversation & assistant capability queries
   const pureCasualQueries = [
     /^(halo|hai|hi|hello|hey|hei|pagi|siang|sore|malam|good morning|good evening|good day)[\s!.,]*$/i,
     /^(siapa kamu|kamu siapa|siapa anda|who are you|sopo kowe|kamu itu apa|siapa namamu|namamu siapa)[\s!.,?]*$/i,
     /^(apa kabar|how are you|piye kabare|sehat|kabar|gimana kabarnya)[\s!.,?]*$/i,
     /^(terima kasih|makasih|thanks|thank you|matur nuwun|syukron)[\s!.,]*$/i,
-    /^(bisa apa|fitur apa|kemampuan kamu|help me|tolong bantu|kamu bisa apa)[\s!.,?]*$/i,
+    /(bisa apa|fitur apa|kemampuan|apa saja yang bisa kamu|apa yang kamu bisa|kamu bisa apa|apa kemampuanmu)/i,
     /^(tes|test|testing|ping|tes bug|test bug|cek bug|cek|cek sistem|status)[\s!.,?]*$/i,
     /^(catat|simpan ke obsidian|tulis catatan|daftar catatan|list notes)[\s!:]*$/i,
   ];
@@ -278,85 +278,26 @@ export function shouldPerformWebSearch(query: string): boolean {
     "tahun 2026",
     "latest news",
     "current price",
-    "hari ini",
+    "kurs dollar",
+    "harga emas",
   ];
 
   if (explicitSearchTriggers.some((trigger) => lower.includes(trigger))) {
     return true;
   }
 
-  // 4. Broad knowledge, how-to, setup, tutorial, and informational triggers
-  const infoTriggers = [
-    // How-to / Tutorial / Installation (frameworks, software, coding)
-    "cara ",
-    "bagaimana ",
-    "gimana ",
-    "how to ",
-    "how do ",
-    "install",
-    "instalasi",
-    "setup",
-    "unduh",
-    "download",
-    "tutorial",
-    "panduan",
-    "langkah",
-    "framework",
-    "library",
-    "modul",
-    "package",
-    "konfigurasi",
-    // Inquiries & Facts
-    "apa itu",
-    "apa arti",
-    "apa maksud",
-    "pengertian",
-    "definisi",
-    "sejarah",
-    "rekomendasi",
-    "review",
-    "ulasan",
-    "spesifikasi",
-    "harga",
-    "berita",
-    "cuaca",
-    "siapa penemu",
-    "siapa presiden",
-    "siapa menteri",
-    "siapa juara",
-    "siapa pendiri",
-    "kapan ",
-    "dimana ",
-    "mengapa ",
-    "kenapa ",
-    "perbedaan ",
-    "beda ",
-    "vs ",
-    "fungsi ",
-    "kegunaan ",
-    "manfaat ",
-    "contoh ",
-    "jelaskan ",
-    "explain ",
-    "what is ",
-    "who is ",
-    "why ",
-    "where ",
-    "when ",
+  // 4. Framework / Software installation queries that need live official documentation
+  const installTriggers = [
+    "cara install",
+    "cara instal",
+    "cara pasang",
+    "cara setup",
+    "how to install",
+    "how to setup",
+    "panduan install",
   ];
 
-  if (infoTriggers.some((trigger) => lower.includes(trigger))) {
-    return true;
-  }
-
-  // 5. If query contains a question mark and has at least 3 words, search web!
-  const words = lower.split(/\s+/).filter((w) => w.length > 0);
-  if (lower.includes("?") && words.length >= 3) {
-    return true;
-  }
-
-  // 6. If query has 4 or more words and is not casual chat, benefit from web absorption!
-  if (words.length >= 4) {
+  if (installTriggers.some((trigger) => lower.includes(trigger))) {
     return true;
   }
 
