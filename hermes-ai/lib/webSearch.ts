@@ -301,5 +301,43 @@ export function shouldPerformWebSearch(query: string): boolean {
     return true;
   }
 
+  // 5. Knowledge, concept, tutorial, and comparison questions (gathers web facts so AI doesn't loop)
+  const knowledgeTriggers = [
+    "apa itu",
+    "apa maksud",
+    "apa arti",
+    "pengertian",
+    "definisi",
+    "apakah ",
+    "bagaimana cara",
+    "gimana cara",
+    "cara membuat",
+    "cara bikin",
+    "cara kerja",
+    "perbedaan ",
+    "beda ",
+    "vs ",
+    "sejarah ",
+    "kelebihan ",
+    "kekurangan ",
+    "tutorial",
+    "panduan",
+    "rekomendasi",
+    "fungsi ",
+    "manfaat ",
+    "kenapa ",
+    "mengapa ",
+    "contoh ",
+    "jelaskan ",
+    "explain ",
+    "what is ",
+    "how does ",
+    "why does ",
+  ];
+
+  if (knowledgeTriggers.some((trigger) => lower.includes(trigger))) {
+    return true;
+  }
+
   return false;
 }

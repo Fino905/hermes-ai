@@ -590,22 +590,27 @@ ${absorbedArticle.content.slice(0, 1000)}...
   if (searchPackage && searchPackage.results.length > 0) {
     let response = "";
 
-    // If full official web article was extracted, synthesize directly
     if (searchPackage.topArticle && searchPackage.topArticle.content) {
-      response += `Berdasarkan dokumentasi dan sumber resmi [${searchPackage.topArticle.title}](${searchPackage.topArticle.url}):\n\n`;
-      response += `${searchPackage.topArticle.content.slice(0, 1200)}\n\n`;
-      response += `**Sumber Referensi:**\n`;
+      response += `> 🌐 *Menyerap informasi dari situs resmi [${searchPackage.topArticle.title}](${searchPackage.topArticle.url})...*\n\n`;
+      response += `${searchPackage.topArticle.content.slice(0, 1500)}\n\n`;
     } else {
-      response += `Berikut rangkuman informasi yang diperoleh mengenai **${searchPackage.query}**:\n\n`;
+      // Synthesize directly from the best search snippet
+      const bestSnippet = searchPackage.results[0].snippet;
+      response += `> 🌐 *Menemukan informasi terpercaya dari web mengenai "${searchPackage.query}"...*\n\n`;
+      response += `${bestSnippet}\n\n`;
+      if (searchPackage.results[1]?.snippet) {
+        response += `${searchPackage.results[1].snippet}\n\n`;
+      }
     }
 
+    response += `---\n\n### 🔗 Sumber Web Terkait:\n`;
     response += searchPackage.results
       .slice(0, 4)
-      .map((res) => `- [${res.title}](${res.url}) — ${res.snippet}`)
-      .join("\n\n");
+      .map((res, idx) => `${idx + 1}. [${res.title}](${res.url}) (\`${res.domain}\`)`)
+      .join("\n");
 
     if (searchPackage.savedNotePath) {
-      response += `\n\n💡 *Catatan riset ini telah disimpan ke vault Obsidian Anda di \`${searchPackage.savedNotePath}\`.*`;
+      response += `\n\n💡 *Disimpan ke Obsidian: \`${searchPackage.savedNotePath}\`*`;
     }
 
     return response;
@@ -872,6 +877,16 @@ Instructions for Multi-Source Web Knowledge:
             async start(controller) {
               let buffer = "";
               let accumulatedAssistantText = "";
+
+              // If web search gathered sources during thinking, emit a brief web discovery badge
+              if (searchPackage && searchPackage.results.length > 0) {
+                const domains = searchPackage.results
+                  .slice(0, 3)
+                  .map((r) => `\`${r.domain}\``)
+                  .join(", ");
+                const searchBadge = `> 🌐 *Menemukan & membaca sumber web (${domains})...*\n\n`;
+                controller.enqueue(encoder.encode(searchBadge));
+              }
 
               try {
                 while (true) {

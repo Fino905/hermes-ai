@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Message } from "@/types/chat";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import {
@@ -29,6 +29,30 @@ function formatTime(timestamp: number) {
   } catch {
     return "";
   }
+}
+
+function ThinkingIndicator() {
+  const [stepIndex, setStepIndex] = useState(0);
+  const steps = [
+    "Fwinobox is thinking...",
+    "🔍 Menjelajahi sumber web terkait...",
+    "📄 Membaca referensi & dokumentasi...",
+    "💡 Mensintesis jawaban...",
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setStepIndex((prev) => (prev + 1) % steps.length);
+    }, 1600);
+    return () => clearInterval(timer);
+  }, [steps.length]);
+
+  return (
+    <div className="flex items-center gap-2 py-2 text-zinc-300 text-xs font-mono">
+      <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+      <span className="transition-opacity duration-300">{steps[stepIndex]}</span>
+    </div>
+  );
 }
 
 export function MessageItem({ message, isLast }: MessageItemProps) {
@@ -110,10 +134,7 @@ export function MessageItem({ message, isLast }: MessageItemProps) {
               isStreaming={isMessageStreaming}
             />
           ) : (
-            <div className="flex items-center gap-2 py-2 text-zinc-400 text-xs">
-              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-              <span>Fwinobox is thinking...</span>
-            </div>
+            <ThinkingIndicator />
           )}
         </div>
 
