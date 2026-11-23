@@ -372,7 +372,16 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        console.error("Chat error:", err);
+        console.warn("Chat connection warning:", err);
+        const isFetchFail =
+          String(err).includes("Failed to fetch") ||
+          String(err).includes("NetworkError") ||
+          (err as TypeError)?.message?.includes("fetch");
+
+        const errorMessage = isFetchFail
+          ? "⚠️ Tidak dapat terhubung ke server Fwinobox AI (port 3000 offline).\n\nPastikan server lokal sedang berjalan dengan menjalankan **Start-Fwinobox.bat**, lalu coba kembali."
+          : "Maaf, terjadi kendala saat menghubungkan ke Fwinobox AI. Silakan coba kembali.";
+
         setConversations((prev) =>
           prev.map((c) => {
             if (c.id !== targetConvId) return c;
@@ -382,9 +391,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
                 m.id === assistantMsgId
                   ? {
                       ...m,
-                      content:
-                        m.content ||
-                        "Apologies, an error occurred while connecting to Fwinobox AI. Please try again.",
+                      content: m.content || errorMessage,
                       status: "error",
                     }
                   : m
