@@ -21,7 +21,21 @@ function checkServerReady() {
   });
 }
 
-// Check if local LLM backend is online
+// Check if Ollama backend is online
+function checkOllamaReady() {
+  return new Promise((resolve) => {
+    const req = http.get("http://127.0.0.1:11434/v1/models", (res) =>
+      resolve(res.statusCode < 500)
+    );
+    req.on("error", () => resolve(false));
+    req.setTimeout(1000, () => {
+      req.destroy();
+      resolve(false);
+    });
+  });
+}
+
+// Check if Hermes local LLM backend is online
 function checkLlmReady() {
   return new Promise((resolve) => {
     const req = http.get(
@@ -35,6 +49,12 @@ function checkLlmReady() {
       resolve(false);
     });
   });
+}
+
+function findOllamaExe() {
+  const localOllama = path.join(process.env.LOCALAPPDATA || "", "Programs\\Ollama\\ollama.exe");
+  if (fs.existsSync(localOllama)) return localOllama;
+  return null;
 }
 
 // Find Chrome or Edge executable
@@ -57,25 +77,38 @@ function findBrowserExe() {
 async function main() {
   console.log("Checking Fwinobox AI system status...");
 
-  // 1. Ensure local LLM backend is running
-  let isLlmOnline = await checkLlmReady();
-  if (!isLlmOnline) {
-    console.log("Starting local AI model backend in background...");
-    try {
-      execSync('start explorer.exe shell:AppsFolder\\NousResearchInc.HermesAgent_sznbd6dv1j3v4!HermesBundled');
-    } catch {}
-
-    // Give local model backend time to initialize (up to 15 seconds)
-    let llmAttempts = 0;
-    while (!isLlmOnline && llmAttempts < 25) {
-      await new Promise((r) => setTimeout(r, 600));
-      isLlmOnline = await checkLlmReady();
-      llmAttempts++;
+  // 1. Ensure local LLM backend is running (Prioritize Ollama on port 11434)
+  let isOllamaOnline = await checkOllamaReady();
+  if (!isOllamaOnline) {
+    const ollamaExe = findOllamaExe();
+    if (ollamaExe) {
+      console.log("Starting Ollama AI engine in background...");
+      try {
+        spawn(ollamaExe, ["serve"], { stdio: "ignore", detached: true }).unref();
+      } catch {}
+      let attempts = 0;
+      while (!isOllamaOnline && attempts < 15) {
+        await new Promise((r) => setTimeout(r, 500));
+        isOllamaOnline = await checkOllamaReady();
+        attempts++;
+      }
     }
-    if (isLlmOnline) {
-      console.log("Local AI model backend is online and ready!");
-    } else {
-      console.log("Local AI model backend is continuing startup in background.");
+  }
+
+  if (!isOllamaOnline) {
+    let isLlmOnline = await checkLlmReady();
+    if (!isLlmOnline) {
+      console.log("Starting Hermes fallback AI model backend in background...");
+      try {
+        execSync('start explorer.exe shell:AppsFolder\\NousResearchInc.HermesAgent_sznbd6dv1j3v4!HermesBundled');
+      } catch {}
+
+      let llmAttempts = 0;
+      while (!isLlmOnline && llmAttempts < 25) {
+        await new Promise((r) => setTimeout(r, 600));
+        isLlmOnline = await checkLlmReady();
+        llmAttempts++;
+      }
     }
   }
 
