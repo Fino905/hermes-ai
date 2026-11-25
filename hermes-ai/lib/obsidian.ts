@@ -278,58 +278,31 @@ export function getVaultStats(): VaultStats {
 }
 
 /**
- * Build rich system prompt context injecting Obsidian Brain knowledge
+ * Build lean, highly focused system prompt context injecting Obsidian Brain knowledge
  */
 export function buildObsidianBrainPrompt(query: string): string {
-  const vaultPath = getVaultPath();
   const stats = getVaultStats();
   const coreMemory = getCoreMemory();
-  const relevantNotes = searchVault(query, 3);
-  const allNotes = listVaultNotes();
+  const relevantNotes = searchVault(query, 2);
 
-  const noteListSnippet = allNotes
-    .map((n) => `- [[${n.title}]] (${n.relativePath})`)
-    .slice(0, 10)
-    .join("\n");
-
-  let prompt = `You are Fwinobox AI, an intelligent personal assistant powered by your Obsidian Knowledge Vault ("Obsidian Brain").
-Vault Location: ${vaultPath}
-Total Notes in Brain: ${stats.totalNotes}
-
-UNIVERSAL MULTILINGUAL CAPABILITY:
-You possess native fluency and deep comprehension in ALL human languages (including Bahasa Indonesia, English, 日本語, 中文, Español, Français, Deutsch, العربية, Русский, 한국어, Português, Italiano, Basa Jawa, Basa Sunda, and all other world and regional languages).
-You MUST:
-1. Automatically detect the user's input language and respond in the exact same language with natural phrasing and appropriate cultural tone.
-2. If the user explicitly asks for a particular language (e.g. "jawab dalam bahasa Jepang", "explain in Spanish"), strictly obey that request.
-3. Freely interpret and reference your Obsidian notes regardless of what language the notes were written in, translating or summarizing them into the user's active language as needed.
+  let prompt = `You are Fwinobox AI, an intelligent, concise, and helpful personal assistant connected to the user's Obsidian Vault (${stats.totalNotes} notes).
+Rules:
+1. Detect user language and respond strictly in the same language (use natural Bahasa Indonesia if user writes in Indonesian).
+2. Answer directly, factually, and stay strictly on topic. Do NOT ramble, hallucinate, or repeat boilerplate templates.
+3. When using numbered lists, use sequential numbers: 1., 2., 3., etc.
+4. Stop immediately once the answer is complete.
 `;
 
   if (coreMemory) {
-    prompt += `=== OBSIDIAN CORE MEMORY ===\n${coreMemory.slice(0, 1000)}\n============================\n\n`;
+    prompt += `\n[Core Memory Context]\n${coreMemory.slice(0, 400)}\n`;
   }
 
   if (relevantNotes.length > 0) {
-    prompt += `=== RELEVANT OBSIDIAN NOTES FOR THIS QUERY ===\n`;
+    prompt += `\n[Relevant Notes in Vault]\n`;
     for (const note of relevantNotes) {
-      prompt += `--- Note: [[${note.title}]] (${note.relativePath}) ---\n${note.content.slice(0, 600)}\n\n`;
+      prompt += `- [[${note.title}]]: ${note.content.slice(0, 300).replace(/\n+/g, " ")}\n`;
     }
-    prompt += `==============================================\n\n`;
   }
-
-  if (allNotes.length > 0) {
-    prompt += `Notes currently available in your Obsidian Vault:\n${noteListSnippet}\n\n`;
-  }
-
-  prompt += `Guidelines:
-1. You represent Fwinobox AI, an intelligent personal assistant.
-2. Answer directly, naturally, and conversationally in fluent paragraphs. Do NOT repeat boilerplate phrases or use rigid templates.
-3. When listing items with numbers, ALWAYS use sequential numbers: 1., 2., 3., 4., etc. (never repeat '1.' for every item).
-4. Once you have answered the user's inquiry, stop generating immediately.
-5. If the user asks who you are or about your purpose, explain naturally and politely based on your Core Memory.
-6. When referencing notes in the vault, you may use Obsidian-style wikilinks like [[Note Title]].
-7. Always be helpful, concise, and articulate in whatever language the user speaks.
-8. If the user explicitly asks to remember something or write a note, confirm that you will save it into Obsidian.
-`;
 
   return prompt;
 }

@@ -590,20 +590,23 @@ ${absorbedArticle.content.slice(0, 1000)}...
   if (searchPackage && searchPackage.results.length > 0) {
     let response = "";
 
+    const queryClean = searchPackage.query;
+    response += `### 🌐 Hasil Penelusuran Web: "${queryClean}"\n\n`;
+
     if (searchPackage.topArticle && searchPackage.topArticle.content) {
-      response += `> 🌐 *Menyerap informasi dari situs resmi [${searchPackage.topArticle.title}](${searchPackage.topArticle.url})...*\n\n`;
-      response += `${searchPackage.topArticle.content.slice(0, 1500)}\n\n`;
+      const summaryText = searchPackage.topArticle.content
+        .replace(/\s+/g, " ")
+        .slice(0, 600);
+      response += `${summaryText}...\n\n`;
     } else {
-      // Synthesize directly from the best search snippet
       const bestSnippet = searchPackage.results[0].snippet;
-      response += `> 🌐 *Menemukan informasi terpercaya dari web mengenai "${searchPackage.query}"...*\n\n`;
       response += `${bestSnippet}\n\n`;
       if (searchPackage.results[1]?.snippet) {
         response += `${searchPackage.results[1].snippet}\n\n`;
       }
     }
 
-    response += `---\n\n### 🔗 Sumber Web Terkait:\n`;
+    response += `---\n\n### 🔗 Sumber Web Rujukan:\n`;
     response += searchPackage.results
       .slice(0, 4)
       .map((res, idx) => `${idx + 1}. [${res.title}](${res.url}) (\`${res.domain}\`)`)
@@ -752,30 +755,17 @@ Instructions for this Web Knowledge:
 `;
     }
 
-    // If multi-source web search results were absorbed, inject them
+    // If multi-source web search results were absorbed, inject them concisely
     if (searchPackage && searchPackage.results.length > 0) {
-      obsidianPrompt += `\n\n=== LIVE MULTI-SOURCE WEB KNOWLEDGE ABSORBED ===
-Search Query: "${searchPackage.query}"
-Total Web Sources Discovered: ${searchPackage.results.length}
-
-${
-  searchPackage.topArticle
-    ? `[OFFICIAL WEBPAGE CONTENT EXTRACTED FROM: ${searchPackage.topArticle.title}]\nSource URL: ${searchPackage.topArticle.url} (Domain: ${searchPackage.topArticle.domain})\nContent:\n${searchPackage.topArticle.content.slice(0, 1500)}\n\n`
-    : ""
-}
-${searchPackage.results
-  .map(
-    (res, idx) =>
-      `[Source ${idx + 1}] Title: ${res.title}\nURL: ${res.url} (Domain: ${res.domain})\nKey Information: ${res.snippet}`
-  )
-  .join("\n\n")}
-${searchPackage.savedNotePath ? `Knowledge saved to Obsidian Vault: [[${searchPackage.query}]] (${searchPackage.savedNotePath})\n` : ""}
-===============================================
-Instructions for Multi-Source Web Knowledge:
-1. Answer the user's question directly, clearly, and conversationally in natural paragraphs using the live web information above.
-2. Cite the web sources cleanly with markdown links like [Title](URL).
-3. Do NOT output repetitive template headers, boilerplate tables, or repetitive phrases.
-`;
+      obsidianPrompt += `\n[Live Web Search Context for: "${searchPackage.query}"]\n`;
+      if (searchPackage.topArticle) {
+        obsidianPrompt += `Key Excerpt (${searchPackage.topArticle.domain}): ${searchPackage.topArticle.content.slice(0, 400).replace(/\s+/g, " ")}\n`;
+      }
+      const topSnippets = searchPackage.results.slice(0, 3);
+      for (const res of topSnippets) {
+        obsidianPrompt += `- ${res.title} (${res.url}): ${res.snippet.slice(0, 160).replace(/\s+/g, " ")}\n`;
+      }
+      obsidianPrompt += `Instruction: Use the web facts above to answer directly, accurately, and naturally. Cite sources with markdown links [Title](URL).\n`;
     }
 
     // 3. Connect to local LLM server
@@ -838,12 +828,12 @@ Instructions for Multi-Source Web Knowledge:
             ...messages.slice(-4),
           ],
           stream: true,
-          temperature: 0.5,
-          top_p: 0.85,
-          max_tokens: 512,
-          repeat_penalty: 1.18,
-          frequency_penalty: 0.3,
-          presence_penalty: 0.2,
+          temperature: 0.3,
+          top_p: 0.9,
+          max_tokens: 600,
+          repeat_penalty: 1.08,
+          frequency_penalty: 0.0,
+          presence_penalty: 0.0,
           stop: [
             "<|im_end|>",
             "<|im_start|>",
