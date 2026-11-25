@@ -755,18 +755,19 @@ Instructions for this Web Knowledge:
 `;
     }
 
-    // If multi-source web search results were absorbed, inject them concisely with strict grounding
+    // If multi-source web search results were absorbed, inject them cleanly without leaking prompt headers
     if (searchPackage && searchPackage.results.length > 0) {
-      obsidianPrompt += `\n[VERIFIED WEB FACTS for "${searchPackage.query}"]\n`;
-      const topResults = searchPackage.results.slice(0, 3);
+      const hasWiki = searchPackage.results.some((r) => r.sourceType === "wikipedia");
+      obsidianPrompt += `\nContext from web search for "${searchPackage.query}":\n`;
+      const topResults = searchPackage.results.slice(0, 2);
       for (const res of topResults) {
-        const limit = res.sourceType === "wikipedia" ? 450 : 220;
-        obsidianPrompt += `- [${res.title}](${res.url}): ${res.snippet.slice(0, limit).replace(/\s+/g, " ")}\n`;
+        const cleanText = res.snippet.replace(/\s+/g, " ").trim();
+        obsidianPrompt += `${res.title}: ${cleanText}\n`;
       }
-      if (searchPackage.topArticle && searchPackage.topArticle.content) {
-        obsidianPrompt += `Page Excerpt (${searchPackage.topArticle.domain}): ${searchPackage.topArticle.content.slice(0, 350).replace(/\s+/g, " ")}\n`;
+      if (!hasWiki && searchPackage.topArticle && searchPackage.topArticle.content) {
+        obsidianPrompt += `Summary (${searchPackage.topArticle.domain}): ${searchPackage.topArticle.content.slice(0, 350).replace(/\s+/g, " ")}\n`;
       }
-      obsidianPrompt += `STRICT GROUNDING RULE: Base your answer ONLY on the verified facts above. State exact names, dates, and numbers accurately. Never guess or invent facts.\n`;
+      obsidianPrompt += `\nUse only the facts above to answer the user's question clearly in natural sentences. Do not copy raw labels or invent unrelated facts.\n`;
     }
 
     // 3. Connect to local LLM server

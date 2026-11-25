@@ -33,8 +33,23 @@ function decodeBingUrl(rawUrl: string): string {
 }
 
 /**
+ * Truncate text cleanly at the last complete sentence within maxLen
+ */
+export function truncateAtSentence(text: string, maxLen: number): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= maxLen) return clean;
+  const sub = clean.slice(0, maxLen);
+  const lastPeriod = Math.max(sub.lastIndexOf(". "), sub.lastIndexOf("! "), sub.lastIndexOf("? "));
+  if (lastPeriod > maxLen * 0.45) {
+    return sub.slice(0, lastPeriod + 1).trim();
+  }
+  const lastSpace = sub.lastIndexOf(" ");
+  return (lastSpace > 0 ? sub.slice(0, lastSpace) : sub).trim();
+}
+
+/**
  * Clean conversational filler and question prefixes so search engines find the actual topic
- * instead of KBBI dictionary definitions for words like "siapa" or "berapa".
+ * instead of KBBI dictionary definitions or unrelated words like "itu".
  */
 export function cleanSearchQuery(raw: string): string {
   let q = raw.trim().replace(/[?!.]+$/g, "");
@@ -42,10 +57,11 @@ export function cleanSearchQuery(raw: string): string {
   if (!/\b(arti kata|makna kata|definisi kata|kbbi)\b/i.test(q)) {
     q = q
       .replace(
-        /^(siapakah|siapa|berapakah|berapa|kapankah|kapan|dimanakah|di mana|dimana|apakah|apa itu|apa|jelaskan tentang|jelaskan|sebutkan|ceritakan tentang|ceritakan)\s+/gi,
+        /^(siapakah itu|siapa itu|berapakah|berapa|kapankah|kapan|dimanakah|di mana|dimana|apakah itu|apa itu|siapakah|siapa|apakah|apa|jelaskan tentang|jelaskan|sebutkan|ceritakan tentang|ceritakan)\s+/gi,
         ""
       )
       .trim();
+    q = q.replace(/^(itu|ini)\s+/gi, "").trim();
   }
   return q || raw.trim();
 }
@@ -110,11 +126,14 @@ export async function searchBing(query: string, limit = 5): Promise<SearchResult
         continue;
       }
 
-      // Skip KBBI / dictionary / CJK spam unless explicitly requested
+      // Skip KBBI / dictionary / CJK spam / WAF error pages
       if (!wantsDictionary && (spamDomains.some((d) => domain.includes(d)) || /^arti kata/i.test(title))) {
         continue;
       }
       if (!queryHasCJK && /[\u4E00-\u9FFF]/.test(title + snippet)) {
+        continue;
+      }
+      if (/(request rejected|access denied|403 forbidden|support id is|consult with your administrator|enable javascript|attention required.*cloudflare)/i.test(title + " " + snippet)) {
         continue;
       }
 
@@ -171,7 +190,7 @@ export async function searchWikipedia(query: string, lang = "id"): Promise<Searc
         title: p.title,
         url: `https://${lang}.wikipedia.org/wiki/${encodeURIComponent((p.title || "").replace(/ /g, "_"))}`,
         domain: `${lang}.wikipedia.org`,
-        snippet: (p.extract || "").replace(/\s+/g, " ").slice(0, 800),
+        snippet: truncateAtSentence(p.extract || "", 600),
         sourceType: "wikipedia" as const,
       }));
   } catch {
