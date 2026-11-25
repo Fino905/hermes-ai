@@ -755,17 +755,18 @@ Instructions for this Web Knowledge:
 `;
     }
 
-    // If multi-source web search results were absorbed, inject them concisely
+    // If multi-source web search results were absorbed, inject them concisely with strict grounding
     if (searchPackage && searchPackage.results.length > 0) {
-      obsidianPrompt += `\n[Live Web Search Context for: "${searchPackage.query}"]\n`;
-      if (searchPackage.topArticle) {
-        obsidianPrompt += `Key Excerpt (${searchPackage.topArticle.domain}): ${searchPackage.topArticle.content.slice(0, 400).replace(/\s+/g, " ")}\n`;
+      obsidianPrompt += `\n[VERIFIED WEB FACTS for "${searchPackage.query}"]\n`;
+      const topResults = searchPackage.results.slice(0, 3);
+      for (const res of topResults) {
+        const limit = res.sourceType === "wikipedia" ? 450 : 220;
+        obsidianPrompt += `- [${res.title}](${res.url}): ${res.snippet.slice(0, limit).replace(/\s+/g, " ")}\n`;
       }
-      const topSnippets = searchPackage.results.slice(0, 3);
-      for (const res of topSnippets) {
-        obsidianPrompt += `- ${res.title} (${res.url}): ${res.snippet.slice(0, 160).replace(/\s+/g, " ")}\n`;
+      if (searchPackage.topArticle && searchPackage.topArticle.content) {
+        obsidianPrompt += `Page Excerpt (${searchPackage.topArticle.domain}): ${searchPackage.topArticle.content.slice(0, 350).replace(/\s+/g, " ")}\n`;
       }
-      obsidianPrompt += `Instruction: Use the web facts above to answer directly, accurately, and naturally. Cite sources with markdown links [Title](URL).\n`;
+      obsidianPrompt += `STRICT GROUNDING RULE: Base your answer ONLY on the verified facts above. State exact names, dates, and numbers accurately. Never guess or invent facts.\n`;
     }
 
     // 3. Connect to local LLM server
