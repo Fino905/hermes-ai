@@ -859,7 +859,7 @@ Instructions for this Web Knowledge:
         };
 
         const fetchCtrl = new AbortController();
-        const fetchTimeout = setTimeout(() => fetchCtrl.abort(), 30000);
+        const fetchTimeout = setTimeout(() => fetchCtrl.abort(), 120000);
         const llmResponse = await fetch(`${activeUrl}/chat/completions`, {
           method: "POST",
           headers: {
