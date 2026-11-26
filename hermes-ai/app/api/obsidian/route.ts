@@ -15,29 +15,55 @@ export async function GET() {
       preview: n.content.slice(0, 150).replace(/\n+/g, " "),
     }));
 
-    // Check if local LLM server is online
+    // Check if local LLM server is online (Prioritize Ollama on port 11434, fallback to Hermes 18434)
     let llmOnline = false;
-    let activeModel = "qwen2.5-0.5b-instruct-q4_k_m";
+    let activeModel = "qwen2.5:3b";
+    let activeUrl = process.env.OLLAMA_URL || "http://127.0.0.1:11434/v1";
     const localLlmUrl = process.env.LOCAL_LLM_URL || "http://127.0.0.1:18434/v1";
     const localApiKey = process.env.LOCAL_LLM_API_KEY || "6xcq5LFBTUHkN-8VjjTRb_XLX-GephFj";
 
+    // 1. Check Ollama (port 11434)
     try {
       const pingCtrl = new AbortController();
-      const timeout = setTimeout(() => pingCtrl.abort(), 1000);
-      const res = await fetch(`${localLlmUrl}/models`, {
-        headers: { Authorization: `Bearer ${localApiKey}` },
+      const timeout = setTimeout(() => pingCtrl.abort(), 1200);
+      const res = await fetch(`${activeUrl}/models`, {
         signal: pingCtrl.signal,
       });
       clearTimeout(timeout);
       if (res.ok) {
-        llmOnline = true;
-        const data = await res.json();
-        if (data?.data?.[0]?.id) {
-          activeModel = data.data[0].id;
+        const data = await res.json().catch(() => null);
+        const modelsList: { id: string }[] = data?.data || [];
+        const preferred =
+          modelsList.find((m) => /qwen2\.5:(3b|7b|14b)|llama3|gemma2/i.test(m.id)) ||
+          modelsList.find((m) => !m.id.includes("0.5b")) ||
+          modelsList[0];
+
+        if (preferred?.id) {
+          llmOnline = true;
+          activeModel = process.env.OLLAMA_MODEL || preferred.id;
         }
       }
-    } catch {
-      llmOnline = false;
+    } catch {}
+
+    // 2. Fallback: Check Hermes llama-server (port 18434)
+    if (!llmOnline) {
+      try {
+        const pingCtrl = new AbortController();
+        const timeout = setTimeout(() => pingCtrl.abort(), 1000);
+        const res = await fetch(`${localLlmUrl}/models`, {
+          headers: { Authorization: `Bearer ${localApiKey}` },
+          signal: pingCtrl.signal,
+        });
+        clearTimeout(timeout);
+        if (res.ok) {
+          llmOnline = true;
+          activeUrl = localLlmUrl;
+          const data = await res.json().catch(() => null);
+          activeModel = data?.data?.[0]?.id || "qwen2.5-0.5b-instruct-q4_k_m";
+        }
+      } catch {
+        llmOnline = false;
+      }
     }
 
     return NextResponse.json({
@@ -46,7 +72,7 @@ export async function GET() {
       notes,
       llm: {
         isOnline: llmOnline,
-        url: localLlmUrl,
+        url: activeUrl,
         model: activeModel,
       },
     });
