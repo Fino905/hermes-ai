@@ -675,12 +675,12 @@ ${matchedNotes.slice(1).map((n) => `- [[${n.title}]] (\`${n.relativePath}\`)`).j
 Pertanyaan Anda mengenai:
 > *"${lastUserMessage}"*
 
-Saat ini server model AI (LLM) di latar belakang (http://127.0.0.1:18434) sedang tidak aktif, sehingga saya belum dapat menjalankan penalaran neural network untuk menjawab pertanyaan ini secara dinamis.
+Saat ini server model AI lokal (Ollama di port \`11434\` atau Hermes di port \`18434\`) sedang tidak aktif, sehingga saya belum dapat menjalankan penalaran neural network untuk menjawab pertanyaan ini secara dinamis.
 
 ---
 
 ### 💡 Cara Mengaktifkan AI:
-1. Jalankan [Start-Fwinobox.bat](file:///d:/hermes/Start-Fwinobox.bat) untuk mengaktifkan AI engine di background.
+1. Pastikan **Ollama** menyala di latar belakang (buka aplikasi **Ollama** di Start Menu atau jalankan \`ollama serve\`), atau jalankan [Start-Fwinobox.bat](file:///d:/hermes/Start-Fwinobox.bat).
 2. Anda juga bisa menempelkan link web atau menanyakan topik apa pun untuk diserap dari internet ke Obsidian!`;
 }
 
