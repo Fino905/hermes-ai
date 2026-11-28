@@ -15,35 +15,58 @@ export async function GET() {
       preview: n.content.slice(0, 150).replace(/\n+/g, " "),
     }));
 
-    // Check if local LLM server is online (Prioritize Ollama on port 11434, fallback to Hermes 18434)
+    // Check if AI engine is online (Priority: 9Router 20128 -> Ollama 11434 -> Hermes 18434)
     let llmOnline = false;
     let activeModel = "qwen2.5:3b";
     let activeUrl = process.env.OLLAMA_URL || "http://127.0.0.1:11434/v1";
+    const nineRouterUrl = process.env.NINEROUTER_URL || "http://127.0.0.1:20128/v1";
+    const nineRouterKey = process.env.NINEROUTER_API_KEY || "";
+    const nineRouterModel = process.env.NINEROUTER_MODEL || "";
     const localLlmUrl = process.env.LOCAL_LLM_URL || "http://127.0.0.1:18434/v1";
     const localApiKey = process.env.LOCAL_LLM_API_KEY || "6xcq5LFBTUHkN-8VjjTRb_XLX-GephFj";
 
-    // 1. Check Ollama (port 11434)
-    try {
-      const pingCtrl = new AbortController();
-      const timeout = setTimeout(() => pingCtrl.abort(), 1200);
-      const res = await fetch(`${activeUrl}/models`, {
-        signal: pingCtrl.signal,
-      });
-      clearTimeout(timeout);
-      if (res.ok) {
-        const data = await res.json().catch(() => null);
-        const modelsList: { id: string }[] = data?.data || [];
-        const preferred =
-          modelsList.find((m) => /qwen2\.5:(3b|7b|14b)|llama3|gemma2/i.test(m.id)) ||
-          modelsList.find((m) => !m.id.includes("0.5b")) ||
-          modelsList[0];
-
-        if (preferred?.id) {
+    // 1. Check 9Router (port 20128)
+    if (nineRouterKey) {
+      try {
+        const pingCtrl = new AbortController();
+        const timeout = setTimeout(() => pingCtrl.abort(), 1200);
+        const res = await fetch(`${nineRouterUrl}/models`, {
+          headers: { Authorization: `Bearer ${nineRouterKey}` },
+          signal: pingCtrl.signal,
+        });
+        clearTimeout(timeout);
+        if (res.ok) {
           llmOnline = true;
-          activeModel = process.env.OLLAMA_MODEL || preferred.id;
+          activeUrl = nineRouterUrl;
+          activeModel = nineRouterModel || "9router";
         }
-      }
-    } catch {}
+      } catch {}
+    }
+
+    // 2. Fallback: Check Ollama (port 11434)
+    if (!llmOnline) {
+      try {
+        const pingCtrl = new AbortController();
+        const timeout = setTimeout(() => pingCtrl.abort(), 1200);
+        const res = await fetch(`${activeUrl}/models`, {
+          signal: pingCtrl.signal,
+        });
+        clearTimeout(timeout);
+        if (res.ok) {
+          const data = await res.json().catch(() => null);
+          const modelsList: { id: string }[] = data?.data || [];
+          const preferred =
+            modelsList.find((m) => /qwen2\.5:(3b|7b|14b)|llama3|gemma2/i.test(m.id)) ||
+            modelsList.find((m) => !m.id.includes("0.5b")) ||
+            modelsList[0];
+
+          if (preferred?.id) {
+            llmOnline = true;
+            activeModel = process.env.OLLAMA_MODEL || preferred.id;
+          }
+        }
+      } catch {}
+    }
 
     // 2. Fallback: Check Hermes llama-server (port 18434)
     if (!llmOnline) {
