@@ -110,7 +110,21 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [isThinking, setIsThinking] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeModel, setActiveModel] = useState("Fwinobox 3.5 Turbo");
+  const [activeModel, setActiveModelState] = useState("ag/gemini-4-hydrogen-tiered-high");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("fwinobox_active_model");
+      if (saved) setActiveModelState(saved);
+    } catch {}
+  }, []);
+
+  const setActiveModel = useCallback((model: string) => {
+    setActiveModelState(model);
+    try {
+      localStorage.setItem("fwinobox_active_model", model);
+    } catch {}
+  }, []);
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const isInitialMount = useRef(true);

@@ -687,9 +687,10 @@ Saat ini server model AI lokal (Ollama di port \`11434\` atau Hermes di port \`1
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { messages, stream = true } = body as {
+    const { messages, stream = true, model: requestedModel } = body as {
       messages?: MessagePayload[];
       stream?: boolean;
+      model?: string;
     };
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -785,8 +786,15 @@ Instructions for this Web Knowledge:
     let activeModelName = "";
     let useLlm = false;
 
-    // 1. Primary: Check 9Router (port 20128) if configured
-    if (nineRouterKey) {
+    const wantsOllama = requestedModel?.startsWith("ollama/");
+    const wantsHermes = requestedModel?.startsWith("hermes/");
+    const customNineRouterModel =
+      requestedModel && !wantsOllama && !wantsHermes && !requestedModel.startsWith("Fwinobox")
+        ? requestedModel
+        : "";
+
+    // 1. Primary: Check 9Router (port 20128) if configured and user didn't explicitly pick local Ollama/Hermes
+    if (nineRouterKey && !wantsOllama && !wantsHermes) {
       try {
         const pingCtrl = new AbortController();
         const timeout = setTimeout(() => pingCtrl.abort(), 1500);
@@ -799,13 +807,13 @@ Instructions for this Web Knowledge:
           useLlm = true;
           activeUrl = nineRouterUrl;
           activeKey = nineRouterKey;
-          activeModelName = nineRouterModel || "qwencloud/qwen3.8-flash";
+          activeModelName = customNineRouterModel || nineRouterModel || "ag/gemini-4-hydrogen-tiered-high";
         }
       } catch {}
     }
 
-    // 2. Fallback: Check Ollama (port 11434)
-    if (!useLlm) {
+    // 2. Check Ollama (port 11434) if selected explicitly or 9Router unavailable
+    if (!useLlm && !wantsHermes) {
       try {
         const pingCtrl = new AbortController();
         const timeout = setTimeout(() => pingCtrl.abort(), 1500);
@@ -821,11 +829,12 @@ Instructions for this Web Knowledge:
             modelsList.find((m) => !m.id.includes("0.5b")) ||
             modelsList[0];
 
-          if (preferred?.id) {
+          const explicitOllama = wantsOllama ? requestedModel!.replace(/^ollama\//, "") : "";
+          if (explicitOllama || preferred?.id) {
             useLlm = true;
             activeUrl = ollamaUrl;
             activeKey = "ollama";
-            activeModelName = process.env.OLLAMA_MODEL || preferred.id;
+            activeModelName = explicitOllama || process.env.OLLAMA_MODEL || preferred.id;
           }
         }
       } catch {}

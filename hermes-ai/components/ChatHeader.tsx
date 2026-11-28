@@ -10,8 +10,42 @@ import {
 } from "./Icons";
 
 const MODELS = [
-  { id: "Fwinobox 3.5 Turbo", badge: "Fast & General", desc: "Optimized for high-speed conversations" },
-  { id: "Fwinobox Pro Reasoning", badge: "Deep Analysis", desc: "Best for complex code, architecture & math" },
+  {
+    id: "ag/gemini-4-hydrogen-tiered-high",
+    label: "Gemini 4 Hydrogen",
+    badge: "9Router • Smart",
+    desc: "Cerdas, seimbang, & akurat untuk analisis mendalam",
+  },
+  {
+    id: "ag/gemini-3.8-flash",
+    label: "Gemini 3.8 Flash",
+    badge: "9Router • Fast",
+    desc: "Respons super cepat & hemat kuota untuk chat harian",
+  },
+  {
+    id: "ag/claude-sonnet-5-5",
+    label: "Claude Sonnet 5.5",
+    badge: "9Router • Coding",
+    desc: "Terbaik untuk coding, arsitektur, & penulisan teknis",
+  },
+  {
+    id: "ag/gpt-oss-120b-medium",
+    label: "GPT-OSS 120B",
+    badge: "9Router • Reasoning",
+    desc: "Model penalaran terbuka skala besar via Antigravity",
+  },
+  {
+    id: "ollama/qwen2.5:3b",
+    label: "Qwen 2.5 (3B)",
+    badge: "Ollama • Offline",
+    desc: "100% lokal di perangkat tanpa internet",
+  },
+  {
+    id: "hermes/local",
+    label: "Hermes Qwen 0.5B",
+    badge: "Desktop • Lite",
+    desc: "Model cadangan ultra-ringan dari Hermes Desktop",
+  },
 ];
 
 export function ChatHeader() {
@@ -73,7 +107,7 @@ export function ChatHeader() {
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800/90 border border-zinc-800 text-xs font-medium text-zinc-200 transition-all shadow-sm"
           >
             <SparklesIcon className="w-3.5 h-3.5 text-zinc-300" />
-            <span>{activeModel}</span>
+            <span>{MODELS.find((m) => m.id === activeModel)?.label || activeModel}</span>
             <ChevronDownIcon
               className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${
                 isModelDropdownOpen ? "rotate-180" : ""
@@ -87,10 +121,10 @@ export function ChatHeader() {
                 className="fixed inset-0 z-40"
                 onClick={() => setIsModelDropdownOpen(false)}
               />
-              <div className="absolute left-0 mt-2 w-72 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl p-1.5 z-50">
+              <div className="absolute left-0 mt-2 w-80 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl p-1.5 z-50 max-h-[75vh] overflow-y-auto">
                 <div className="px-3 py-2 border-b border-zinc-800/60 mb-1">
                   <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
-                    Select AI Model
+                    Pilih Model AI
                   </p>
                 </div>
                 {MODELS.map((m) => (
@@ -100,15 +134,15 @@ export function ChatHeader() {
                       setActiveModel(m.id);
                       setIsModelDropdownOpen(false);
                     }}
-                    className={`w-full text-left p-2.5 rounded-xl transition-all ${
+                    className={`w-full text-left p-2.5 rounded-xl transition-all mb-0.5 ${
                       activeModel === m.id
                         ? "bg-zinc-800 border border-zinc-700 text-white"
-                        : "hover:bg-zinc-800/60 text-zinc-300"
+                        : "hover:bg-zinc-800/60 text-zinc-300 border border-transparent"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold">{m.id}</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-medium">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-semibold truncate">{m.label}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-400 font-medium shrink-0">
                         {m.badge}
                       </span>
                     </div>
