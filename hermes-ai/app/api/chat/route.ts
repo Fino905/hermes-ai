@@ -858,20 +858,25 @@ Instructions for this Web Knowledge:
       try {
         // If doing fresh web search, send only current question so old answers cannot cause cross-question loops
         const contextMessages = searchPackage ? messages.slice(-1) : messages.slice(-4);
-        const llmPayload = {
+        const isNineRouter = activeUrl === nineRouterUrl;
+
+        const llmPayload: Record<string, unknown> = {
           model: activeModelName,
           messages: [
             { role: "system", content: obsidianPrompt },
             ...contextMessages,
           ],
           stream: true,
-          temperature: 0.3,
-          top_p: 0.9,
-          max_tokens: 600,
-          repeat_penalty: 1.08,
-          frequency_penalty: 0.0,
-          presence_penalty: 0.0,
-          stop: [
+          temperature: isNineRouter ? 0.5 : 0.3,
+          max_tokens: isNineRouter ? 1500 : 600,
+        };
+
+        if (!isNineRouter) {
+          llmPayload.top_p = 0.9;
+          llmPayload.repeat_penalty = 1.08;
+          llmPayload.frequency_penalty = 0.0;
+          llmPayload.presence_penalty = 0.0;
+          llmPayload.stop = [
             "<|im_end|>",
             "<|im_start|>",
             "<|endoftext|>",
@@ -879,8 +884,8 @@ Instructions for this Web Knowledge:
             "\nHuman:",
             "User:",
             "Human:",
-          ],
-        };
+          ];
+        }
 
         const fetchCtrl = new AbortController();
         const fetchTimeout = setTimeout(() => fetchCtrl.abort(), 120000);
